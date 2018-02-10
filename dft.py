@@ -2,42 +2,29 @@ from __future__ import division, print_function
 import csv, sys, math, os
 import numpy as np
 
-def transform(ori_array):
-    trans_array = np.fft.fft(ori_array)
-    return trans_array
+#ta for array returned by fft
+#oa for original array
 
-def find_trans_energy(trans_array):
-    squared_array = list(map(lambda x : x*x, trans_array[1:]))
-    energy = math.sum(squared_array) / (len(squared_array))
-    return energy
+def transform(oa):
+    ta = np.fft.fft(oa)
+    return ta
 
-def find_trans_entropy(trans_array):
-    abs_array = list(map(lambda x : abs(x), trans_array[1:]))
-    abs_sum = math.sum(absval_array)
+def find_trans_energy(ta):
+    return np.average(np.square(ta[1:]))
 
-    def map_entropy(val):
-        p = abs(val) / abs_sum
-        entropy = p * math.log(1/p)
-        return entropy
+def find_trans_entropy(ta):
+    entropy = np.abs(ta[1:]) / np.sum(abs_array)
+    return np.sum(entropy * np.log(1/entropy))
 
-    entropy_array = list(map(map_entropy, trans_array))
-    entropy = math.sum(entropy_array)
-    return entropy
+def find_ori_mean(oa):
+    return np.average(oa)
 
-def find_ori_mean(ori_array):
-    return math.sum(ori_array)/len(ori_array)
+def find_ori_deviation(oa):
+    mean = find_ori_mean(oa)
+    return np.sqrt(np.sum(np.square(oa - mean)))
 
-def find_ori_deviation(ori_array):
-    mean = find_ori_mean(ori_array)
+def find_ori_correlation(outarray):
 
-    def map_deviation(val):
-        return math.square(val-mean)
-
-    deviation_sum = list(map(map_deviation, ori_array))
-
-    return np.sqrt(deviation_sum)
-
-def find_ori_
 
 
 
