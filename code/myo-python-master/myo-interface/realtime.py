@@ -43,6 +43,7 @@ class Listener(libmyo.DeviceListener):
         self.rssi = None
         self.pose = libmyo.Pose.rest
         self.data = []
+        self.accl = []
         self.data_locked = False
         self.emg_enabled = False
         self.locked = False
@@ -72,13 +73,13 @@ class Listener(libmyo.DeviceListener):
             result0[i] = interpolate(self.data[i], 100)
 
         result = np.array(result0, dtype='float64')
-
+        
         self.data = []
 
         #unlock data
         self.data_locked = False
        
-        return result 
+        return result
 
     def get_data(self):
         #current time stamp
@@ -87,15 +88,21 @@ class Listener(libmyo.DeviceListener):
         #     return
         # self.last_time = ctime
 
-        if self.acceleration:
+        #if all eles in a is greater than val return true
+        def comp(a, val):
+            for ele in a:
+                if (ele < val): return False
+            return True 
 
+        if self.acceleration:
             #placeholder for values
             tmp = []
             print("acceleration: ", self.acceleration[0])
             #print(" ", self.data_locked)
+            self.accl.append(self.acceleration[0])
 
             if (not self.data_locked):
-                if (self.acceleration[0] < 0.85):
+                if (self.accl[-1] < 0.85):
                     #print("start recording.........\n")
                     if self.gyroscope and self.orientation:
                         for val in self.gyroscope:
@@ -118,17 +125,26 @@ class Listener(libmyo.DeviceListener):
                         print(len(self.data))
                         #print(self.data)
 
-                if (self.acceleration[0] > 0.9):
+                if (self.accl[-1] > 0.9):
                     #print("rest mode............\n")
+                    #eliminate noise
                     if (not self.data_locked) and (len(self.data) < 50): 
                         self.data = []
-                    if (not self.data_locked) and (self.data != []) and (len(self.data) >= 50):
-                    
-                        #print("running scale...............\n")
-                        self.data_locked = True
-                        result = self.get_vector()
-                        print("result", result)
-                        return result
+                    #if rest pose
+                    if (comp(self.accl[-20:], 0.9)):
+                        #print("accl:", self.accl[-20:])
+                        self.accl = self.accl[:-21]
+                        #print("rest pose, truncate data")
+                        self.data = self.data[:-21]
+
+                        if (not self.data_locked) and (self.data != []) and (len(self.data) >= 50):
+                        
+                            #print("running scale...............\n")
+                            self.data_locked = True
+                            result = self.get_vector()
+                            vector = result.flatten()
+                            print("result", vector)
+                            return vector
 
     def on_connect(self, myo, timestamp, firmware_version):
         myo.vibrate('short')
