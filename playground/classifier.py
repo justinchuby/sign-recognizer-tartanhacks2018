@@ -3,6 +3,7 @@ from sklearn import svm
 from sklearn.externals import joblib
 from dft import *
 from scale import scale
+import numpy as np
 
 labels = {
     "hello": 0,
@@ -77,12 +78,11 @@ def read_data_and_transform(dirpath, thres=0.85):
 
 def time_frame_to_features(time_frame):
     dft_frame = fft(time_frame)
-    dc_offset = find_trans_mean(dft_frame)
-    energy = find_trans_energy(dft_frame)
-    entropy = find_trans_entropy(dft_frame)
+    dc_offset = np.real(find_trans_mean(dft_frame))
+    energy = np.real(find_trans_energy(dft_frame))
+    entropy = np.real(find_trans_entropy(dft_frame))
     # singal_mean = find_ori_mean(time_frame)
-    signal_deviation = find_ori_deviation(time_frame)
-
+    signal_deviation = np.real(find_ori_deviation(time_frame))
     return (dc_offset, energy, entropy, signal_deviation)
 
 
@@ -94,8 +94,17 @@ def main():
     # Do dtfs and output features
     labeled_features = {}
     for sign, label in labels.items():
-        labeled_features[label] = map(time_frame_to_features)
-        # TODO: we stop here
+        print(label)
+        for example in labeled_data[label]:
+            dft_features = np.array(list(map(time_frame_to_features, example))).flatten()
+            if labeled_features.get(label) is None:
+                labeled_features[label] = np.array([dft_features])
+            else:
+                labeled_features[label] = np.concatenate((labeled_features[label], np.array([dft_features])))
+                print(labeled_features[label].size)
+                # TODO: we stop here
+
+    assert(False)
 
     # train model
     # test
