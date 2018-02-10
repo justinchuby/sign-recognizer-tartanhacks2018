@@ -9,6 +9,9 @@ def fft(time_frame):
 	dft_frame = np.fft.fft(time_frame)
 	return dft_frame
 
+def find_trans_mean(dft_frame):
+	return dft_frame[0]
+	
 def find_trans_energy(dft_frame):
 	return np.average(np.square(dft_frame[1:]))
 

@@ -19,7 +19,7 @@ class GridOption:
 		dirname = os.path.dirname(__file__)
 		if sys.platform != 'win32':
 			self.svmtrain_pathname = os.path.join(dirname, '../svm-train')
-			self.gnuplot_pathname = '/usr/bin/gnuplot'
+			self.gnuplot_pathname = '/usr/local/bin/gnuplot'
 		else:
 			# example for windows
 			self.svmtrain_pathname = os.path.join(dirname, r'..\windows\svm-train.exe')
