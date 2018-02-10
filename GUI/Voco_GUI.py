@@ -32,8 +32,11 @@ class introScreen:
 
         #speech recognition text
         self.recogText = ""
+        self.gestTXT = ""
         self.isSpeaking = False
         self.isEndSpeech = False
+        self.isGesturing = False
+        self.inEndGesturing = False
 
 
         #program font panel
@@ -82,6 +85,8 @@ class introScreen:
         self.backicon = pygame.image.load("image/back.png")
         self.speechicon = pygame.image.load("image/speech.png")
         self.stopicon = pygame.image.load("image/pause.png")
+        self.instruction = pygame.image.load("image/Instruction.png")
+        self.gesture = pygame.image.load("image/myo_gestures/double-tap.png")
         # self.tartanhacksicon = pygame.image.load("image/white-tartanhacks.png")
         # self.vocologo = pygame.image.load("image/VocoLogo.png")
 
@@ -93,6 +98,9 @@ class introScreen:
         self.speakbutton_small = pygame.transform.scale(self.speakicon_small, (82, 82))
         self.helpbutton = pygame.transform.scale(self.helpicon, (100, 100))
         self.back_button = pygame.transform.scale(self.backicon,(80,80))
+
+
+
 
 
     def record_audio(self):
@@ -219,6 +227,14 @@ class introScreen:
                     self.isSpeaking = False
                     self.isEndSpeech = True
 
+                if action == "startGesture":
+                    print("Start of the gesture")
+                    # call the gesture recognition function
+
+                if action == "endGesture":
+                    print("End of the of gesture")
+
+
                 
         else:
             # the button returns to the unselected state
@@ -269,9 +285,34 @@ class introScreen:
             listenScreenText = self.largefont.render("Listen Mode",True, self.WHITE)
             self.screen.blit(listenScreenText, [300,50])
 
+            self.button("Start1", 320,590,46,46, self.WINE, self.light_wine, action="startGesture")
+            self.screen.blit(self.gesture,[282,550])
+
+            self.button("End1", 670,590,46,46, self.CYAN, self.light_cyan, action="endGesture") 
+            self.screen.blit(self.stopicon, [647, 565])
+
             self.screen.blit(self.back_button, (35, 548))
             self.screen.blit(self.speakbutton_small, (32, 448))
             
+
+            if(self.isGesturing == False):
+                starterText = self.smallfont.render("Please hit Record to start your sign language. Press stop when finished.", True, self.WHITE)
+                self.screen.blit(starterText,[100,150]) 
+
+            recognizingText = self.smallfont.render("", True, self.WHITE)
+            if(self.isGesturing == True):
+                recognizingText = self.smallfont.render("Recognizing your sign...", True, self.WHITE)
+                self.screen.blit(recognizingText,[100,200]) 
+
+            gestureText = self.medfont.render(self.gestTXT, True, self.WHITE)
+            self.screen.blit(gestureText,[100,300]) 
+
+            if(self.inEndGesturing == True):
+                endText = self.smallfont.render("Pausing your gesture...", True, self.WHITE)
+                self.screen.blit(recognizingText,[100,200]) 
+            
+
+
             pygame.display.update()
 
             self.clock.tick(15)
@@ -293,6 +334,7 @@ class introScreen:
             self.screen.blit(self.back_button, (35, 548))
             
             self.button("Listen", 75,490,46,46, self.COFFEE, self.light_coffee, action="listen")
+            self.screen.blit(self.listenbutton_small, (28, 442))
 
             speakScreenText = self.largefont.render("Speech Mode",True, self.WHITE)
             self.screen.blit(speakScreenText, [300,50])
@@ -302,7 +344,7 @@ class introScreen:
             self.button("End", 670,590,46,46, self.CYAN, self.light_cyan, action="endspeech") 
             self.screen.blit(self.stopicon, [647, 565])
 
-            self.screen.blit(self.listenbutton_small, (28, 442))
+
 
             if(self.isSpeaking == False):
                 starterText = self.smallfont.render("Please hit Record to start speech recognition. Press stop when finished.", True, self.WHITE)
@@ -335,14 +377,12 @@ class introScreen:
                         pygame.quit()
                         quit()
 
-
-            self.screen.blit(self.bg, (0,0))
+            self.screen.blit(self.instruction, [0,0])
 
             self.button("back", 75,588,46,46, self.WINE, self.light_wine, action="backFromSpeak")
             self.screen.blit(self.back_button, (35, 548))
 
-            speakScreenText = self.largefont.render("Instructions",True, self.WHITE)
-            self.screen.blit(speakScreenText, [300,50])
+            
 
             pygame.display.update()
 
