@@ -79,9 +79,6 @@ class Listener(libmyo.DeviceListener):
        
         return result 
 
-
-
-
     def get_data(self):
         #current time stamp
         ctime = time.time()
@@ -120,7 +117,7 @@ class Listener(libmyo.DeviceListener):
                 if self.acceleration[0] > 0.9:
                     print("rest mode............\n")
 
-                    if (not self.data_locked) and (self.data != []):
+                    if (not self.data_locked) and (self.data != []) and (len(self.data) >= 50):
                         print("running scale...............\n")
                         self.data_locked = True
                         result = self.scale()
