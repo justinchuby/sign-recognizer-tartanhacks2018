@@ -2,6 +2,7 @@ from __future__ import division, print_function
 from dft import *
 from scale import *
 
+#######
 #generate feature of one gesture sample
 def gen_samp_feat(samplepath):
 	raw_data = transform(samplepath)
