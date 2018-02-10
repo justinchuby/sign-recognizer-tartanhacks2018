@@ -15,11 +15,20 @@ def interpolate(L, length):
     return np.interp(x, xp, fp)
 
 # 1acceleration file 2target file 3threshold for deciding start 
-
-
-def scale(file_acc, file, thres, bigL=100, smallL=10):
-
+def transform(dirpath, thres=0.85):
+    file_acc = dirpath+"/a.csv"
     (start, end) = start_end.find_startend(file_acc, thres)
+    #print(start, end)
+
+    file_gyro = dirpath+"/g.csv"
+    file_orien = dirpath+"/o.csv"
+
+    gyro_data = scale(start, end, file_gyro)
+    orien_data = scale(start, end, file_orien)
+
+    return gyro_data + orien_data
+
+def scale(start, end, file, bigL=100, smallL=10):
 
     data = np.genfromtxt(file, delimiter=",", names=True, dtype=None)
 
@@ -41,23 +50,13 @@ def scale(file_acc, file, thres, bigL=100, smallL=10):
 
     result = np.array(result0, dtype='float64')
 
-    print(result)
+    #print(result)
 
     #print(len(result[0]))
     #print(result)
 
     final = np.reshape(result, (len(data[0])-1, smallL, -1))
-    #print(final.shape)
-    return final
-
-
-
-
-
-
-
-
-
+    return final 
 
 
 
