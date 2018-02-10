@@ -48,6 +48,7 @@ class Listener(libmyo.DeviceListener):
         self.emg_enabled = False
         self.locked = False
         self.last_time = 0
+        self.finalresult = None
 
 
     def get_vector(self):
@@ -81,11 +82,11 @@ class Listener(libmyo.DeviceListener):
        
         return result 
 
-    def get_gesture(self, vector, path):
+    def get_gesture(self, vector, modelpath):
        
-        def read_range(path):
+        def read_range(rangepath):
             par = []
-            f = open(path, 'r')
+            f = open(rangepath, 'r')
             while 1:
                 s = f.readline()
                 if not s: break
@@ -93,34 +94,71 @@ class Listener(libmyo.DeviceListener):
                 if len(tmp) == 3:
                     if tmp[0] != '-1':
                         par.append([float(tmp[1]), float(tmp[2][:-1])])
+            f.close()
             return par
 
-        def scale(vector):
-            par = read_range(path)
-            
+        def scale(vector, rangepath):
+            result = vector
+            par = read_range(rangepath)
             lower = -1.0
             upper = 1.0
-            for index in range(len(vector)):
-                val = vector[index]
+            for index in range(len(result)):
+                val = result[index]
                 feat_min = par[index][0]
                 feat_max = par[index][1]
                 if (feat_min == feat_max):
                     return
                 if (val == feat_min):
-                    vector[index] = lower
+                    result[index] = lower
                 elif(val == feat_max):
-                    vector[index] = upper
+                    result[index] = upper
                 else:
-                    vector[index] = lower + (upper-lower) * (val-feat_min)/(feat_max-feat_min)
-                    if (vector[index] > 1) : vector[index] = upper
-                    if (vector[index] < -1) : vector[index] = lower
+                    result[index] = lower + (upper-lower) * (val-feat_min)/(feat_max-feat_min)
+                    if (result[index] > 1) : result[index] = upper
+                    if (result[index] < -1) : result[index] = lower
+            return result
 
         #print(svm_dict)
         vector = list(vector)
-        scale(vector)
-        (pred_labels, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [vector], svm_load_model("hello.data.model"))
-        print("pred_labels: ", pred_labels)
-        return pred_labels[0]
+        labels = []
+        # for model in os.listdir(modelpath):
+        #     if (".DS_Store" != model):
+        #         #print("model name :", model, "\n")
+        #         suffix = model.index('.')
+        #         name = model[0:suffix]
+        #         rangename = "range/" + name + ".data.range"
+        #         trans_vector = scale(vector, rangename)
+        #         print(modelpath+"/"+model)
+        #         (pred_labels, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [trans_vector], svm_load_model(modelpath+"/"+model))
+        #         labels.append((model, pred_labels[0]))
+        #         #print("labels are: ", labels, "\n")
+        trans_vector = scale(vector,"range/hello.data.range")
+
+        (pred_labels0, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [trans_vector], svm_load_model("model/hello.data.model"))
+        (pred_labels1, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [trans_vector], svm_load_model("model/my.data.model"))
+        (pred_labels2, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [trans_vector], svm_load_model("model/name.data.model"))
+        (pred_labels3, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [trans_vector], svm_load_model("model/tartan.data.model"))
+        #(pred_labels4, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [trans_vector], svm_load_model("model/hacks.data.model"))
+        (pred_labels4, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [trans_vector], svm_load_model("model/whatsup.data.model"))
+        # predict = []
+        # for tag in labels:
+        #     if tag[1] == 1: 
+        #         predict.append[tag[0]]
+        # if (len(predict) == 0):
+        #     return "Retry"
+        # elif (len(predict) > 1):
+        #     return "Retry"
+        pred_labels = [pred_labels0, pred_labels1, pred_labels2, pred_labels3, pred_labels4]
+
+        if (pred_labels0[0] > 0): self.finalresult = "hello"
+        if (pred_labels1[0] > 0): self.finalresult = "my"
+        if (pred_labels2[0] > 0): self.finalresult = "name"
+        if (pred_labels3[0] > 0): self.finalresult = "tartan"
+        if (pred_labels4[0] > 0): self.finalresult = "whatsup"
+
+        print("this is: ", self.finalresult)
+        #self.finalresult = predict[0]
+        return self.finalresult
 
     def get_data(self):
         #current time stamp
@@ -185,7 +223,8 @@ class Listener(libmyo.DeviceListener):
                             result = self.get_vector()
                             vector = result.flatten()
                             #print("result", vector)
-                            label = self.get_gesture(vector, "hello.data.range")
+                            label = self.get_gesture(vector, "model")
+                            print(label)
                             return label
 
     def on_connect(self, myo, timestamp, firmware_version):
@@ -279,7 +318,7 @@ class Listener(libmyo.DeviceListener):
         Called when the warmup completed.
         """
 
-
+listener = None
 def main():
     print("Connecting to Myo ... Use CTRL^C to exit.")
     try:
@@ -289,7 +328,9 @@ def main():
         return
 
     hub.set_locking_policy(libmyo.LockingPolicy.none)
-    hub.run(1000, Listener())
+    global listener
+    listener = Listener()
+    hub.run(1000, listener)
 
     # Listen to keyboard interrupts and stop the hub in that case.
     try:
