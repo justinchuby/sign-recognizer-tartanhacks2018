@@ -11,7 +11,7 @@ def find_startend(path, thres):
             start = i
         if (abs(data[len(data)-i-1][1]) < thres and end == 0):
             end = len(data)-i-1
-
+    
     return (start, end)
 
 

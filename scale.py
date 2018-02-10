@@ -8,10 +8,19 @@ def make2dList(rows, cols):
     for row in range(rows): a += [[0]*cols]
     return a
 
+def up(L, length):
+    
+
+
+def down(L, length):
+
+
+
+
+
 def scale(file_acc, file, thres, scale_co):
 
     (start, end) = start_end.find_startend(file_acc, thres)
-    print(start, end)
 
     data = np.genfromtxt(file, delimiter=",", names=True, dtype=None)
 
@@ -22,12 +31,10 @@ def scale(file_acc, file, thres, scale_co):
             feat_LL[i][j] = data[j][i]
     timestamp = feat_LL.pop(0)
 
-    print(start, end)
-
     result = make2dList(len(data[0])-1, start-end+1)
 
     for i in range(len(result)):
-        result[i] = feat_LL[i][start::end]
+        result[i] = feat_LL[i][start:end]
 
     return result
 
