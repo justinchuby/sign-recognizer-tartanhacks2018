@@ -62,7 +62,9 @@ def scale(start, end, file, bigL=100, smallL=10):
     #print(result)
 
     final = np.reshape(result, (len(data[0])-1, smallL, -1))
+
     return final 
+
 
 
 
