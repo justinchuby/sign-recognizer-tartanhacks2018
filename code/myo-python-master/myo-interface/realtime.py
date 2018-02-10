@@ -82,10 +82,29 @@ class Listener(libmyo.DeviceListener):
         return result 
 
     def get_gesture(self, vector):
+        # def scale(dict):
+        #     if(feature_max[index] == feature_min[index])
+        #         return;
+
+        #     if(value == feature_min[index])
+        #         value = lower;
+        #     else if(value == feature_max[index])
+        #         value = upper;
+        #     else
+        #         value = lower + (upper-lower) * 
+        #             (value-feature_min[index])/
+        #             (feature_max[index]-feature_min[index]);
+
+        #     if(value != 0)
+        #     {
+        #         printf("%d:%g ",index, value);
+        #         new_num_nonzeros++;
+        #     }
+
         svm_dict = {(v+1) : k for v, k in enumerate(vector)}
         #print(svm_dict)
         (pred_labels, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [svm_dict], svm_load_model("hello.data.model"))
-        #print(pred_labels)
+        print("pred_labels: ", pred_labels)
         return pred_labels[0]
 
     def get_data(self):
