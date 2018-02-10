@@ -33,7 +33,7 @@ class Listener(libmyo.DeviceListener):
     stop the Hub.
     """
 
-    interval = 0.05  # Output only 0.05 seconds
+    interval = 0.02  # Output only 0.02 seconds
 
     def __init__(self):
         super(Listener, self).__init__()
@@ -82,21 +82,21 @@ class Listener(libmyo.DeviceListener):
 
     def get_data(self):
         #current time stamp
-        ctime = time.time()
-        if (ctime - self.last_time) < self.interval:
-            return
-        self.last_time = ctime
+        # ctime = time.time()
+        # if (ctime - self.last_time) < self.interval:
+        #     return
+        # self.last_time = ctime
 
         if self.acceleration:
 
             #placeholder for values
             tmp = []
             print("acceleration: ", self.acceleration[0])
-            print(" ", self.data_locked)
+            #print(" ", self.data_locked)
 
             if (not self.data_locked):
                 if (self.acceleration[0] < 0.85):
-                    print("start recording.........\n")
+                    #print("start recording.........\n")
                     if self.gyroscope and self.orientation:
                         for val in self.gyroscope:
                             tmp.append(val)
@@ -112,14 +112,19 @@ class Listener(libmyo.DeviceListener):
                         yaw = np.arctan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
 
                         tmp.extend([roll,pitch,yaw])
+
                         self.data.append(tmp)
+                        
+                        print(len(self.data))
                         #print(self.data)
 
-                if self.acceleration[0] > 0.9:
-                    print("rest mode............\n")
-
+                if (self.acceleration[0] > 0.9):
+                    #print("rest mode............\n")
+                    if (not self.data_locked) and (len(self.data) < 50): 
+                        self.data = []
                     if (not self.data_locked) and (self.data != []) and (len(self.data) >= 50):
-                        print("running scale...............\n")
+                    
+                        #print("running scale...............\n")
                         self.data_locked = True
                         result = self.get_vector()
                         print("result", result)
