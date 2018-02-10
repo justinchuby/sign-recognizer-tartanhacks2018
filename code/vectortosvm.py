@@ -49,7 +49,8 @@ def gen_data_file_one(gestname, inputpath):
 #all of the one-vs-all files
 def gen_data_file_all(inputpath):
 	for gestname in os.listdir(inputpath):
-		gen_data_file_one(gestname, inputpath)
+		if not (gestname.startswith('.')):
+			gen_data_file_one(gestname, inputpath)
 
 
 gen_data_file_all("test_data")

@@ -11,7 +11,7 @@ def gen_samp_feat(samplepath):
 			dft_frame = fft(time_frame)
 			energy = find_trans_energy(dft_frame)
 			entropy = find_trans_entropy(dft_frame)
-			mean = find_ori_mean(time_frame)
+			mean = find_trans_mean(dft_frame)
 			deviation = find_ori_deviation(time_frame)
 			vector.extend([energy, entropy, mean, deviation])
 	return vector	
