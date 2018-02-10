@@ -79,7 +79,14 @@ class Listener(libmyo.DeviceListener):
         #unlock data
         self.data_locked = False
        
-        return result
+        return result 
+
+    def get_gesture(self, vector):
+        svm_dict = {(v+1) : k for v, k in enumerate(vector)}
+        print(svm_dict)
+        (pred_labels, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [svm_dict], svm_load_model("hello.data.model"))
+        print(pred_labels)
+        return pred_labels[0]
 
     def get_data(self):
         #current time stamp
@@ -97,7 +104,7 @@ class Listener(libmyo.DeviceListener):
         if self.acceleration:
             #placeholder for values
             tmp = []
-            print("acceleration: ", self.acceleration[0])
+            #print("acceleration: ", self.acceleration[0])
             #print(" ", self.data_locked)
             self.accl.append(self.acceleration[0])
 
@@ -122,7 +129,7 @@ class Listener(libmyo.DeviceListener):
 
                         self.data.append(tmp)
                         
-                        print(len(self.data))
+                        #print(len(self.data))
                         #print(self.data)
 
                 if (self.accl[-1] > 0.9):
@@ -143,8 +150,9 @@ class Listener(libmyo.DeviceListener):
                             self.data_locked = True
                             result = self.get_vector()
                             vector = result.flatten()
-                            print("result", vector)
-                            return vector
+                            #print("result", vector)
+                            label = self.get_gesture(vector)
+                            return label
 
     def on_connect(self, myo, timestamp, firmware_version):
         myo.vibrate('short')

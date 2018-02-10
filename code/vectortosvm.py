@@ -25,7 +25,7 @@ def gen_feat_str(gestpath, flag):
 	for vector in gestvector:
 		vectorstring += label + " "
 		for index in range(vectorlen):
-			vectorstring += str(index) + ":" + str(vector[index]) + " "
+			vectorstring += str(index+1) + ":" + str(vector[index]) + " "
 		vectorstring += "\n"
 	return vectorstring 
 

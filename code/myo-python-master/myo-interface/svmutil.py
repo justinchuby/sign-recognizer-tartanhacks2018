@@ -170,7 +170,7 @@ def svm_train(arg1, arg2=None, arg3=None):
 		m.x_space = prob.x_space
 		return m
 
-def svm_predict(y, x, m, options=""):
+def svm_predict(y,x, m, options=""):
 	"""
 	svm_predict(y, x, m [, options]) -> (p_labels, p_acc, p_vals)
 
