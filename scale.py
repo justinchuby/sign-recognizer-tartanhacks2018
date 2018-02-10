@@ -14,7 +14,8 @@ def interpolate(L, length):
     fp = L
     return np.interp(x, xp, fp)
 
-def scale(file_acc, file, thres, length):
+# 1acceleration file 2target file 3threshold for deciding start 
+def scale(file_acc, file, thres):
 
     (start, end) = start_end.find_startend(file_acc, thres)
 
@@ -33,23 +34,14 @@ def scale(file_acc, file, thres, length):
     result0 = make2dList(len(data[0])-1, start-end+1)
 
     for i in range(len(result0)):
-        result0[i] = interpolate(feat_LL[i][start:end], length)
+        result0[i] = interpolate(feat_LL[i][start:end], 100)
 
     result = np.array(result0, dtype='float16')
 
-    print(len(result[0]))
-    print(result)
+    #print(len(result[0]))
+    #print(result)
 
     return np.reshape(result, (3, 10, 10))
-
-
-
-
-
-
-    
-
-
 
 
 
