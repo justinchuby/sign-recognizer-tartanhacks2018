@@ -22,7 +22,8 @@ from __future__ import print_function
 
 import myo as libmyo; libmyo.init("../../sdk/myo.framework")
 import time
-import sys
+import csv, sys, math, os
+import numpy as np
 
 
 class Listener(libmyo.DeviceListener):
@@ -36,32 +37,94 @@ class Listener(libmyo.DeviceListener):
     def __init__(self):
         super(Listener, self).__init__()
         self.orientation = None
+        self.gyroscope = None
+        self.acceleration = None
+        self.rssi = None
         self.pose = libmyo.Pose.rest
+        self.data = []
+        self.data_locked = False
         self.emg_enabled = False
         self.locked = False
-        self.rssi = None
-        self.emg = None
         self.last_time = 0
 
-    def output(self):
+
+    def scale(self):
+
+        def make2dList(rows, cols):
+            a=[]
+            for row in range(rows): a += [[0]*cols]
+            return a
+
+        def interpolate(L, length):
+            xp = np.linspace(0, len(L), num=len(L))
+            x = np.linspace(0, len(L), num=length)
+            fp = L
+            return np.interp(x, xp, fp)
+
+        #mutex is now locked
+        self.data = np.array(self.data) 
+        self.data = self.data.transpose()
+        print("transposed data: ", self.data) 
+        result0 = make2dList(len(self.data), len(self.data[0]))
+
+        for i in range(len(result0)):
+            result0[i] = interpolate(self.data[i], 100)
+
+        result = np.array(result0, dtype='float64')
+
+        self.data = []
+
+        #unlock data
+        self.data_locked = False
+       
+        return result 
+
+
+
+
+    def get_data(self):
+        #current time stamp
         ctime = time.time()
         if (ctime - self.last_time) < self.interval:
             return
         self.last_time = ctime
 
-        parts = []
-        if self.orientation:
-            for comp in self.orientation:
-                parts.append(str(comp).ljust(15))
-        parts.append(str(self.pose).ljust(10))
-        parts.append('E' if self.emg_enabled else ' ')
-        parts.append('L' if self.locked else ' ')
-        parts.append(self.rssi or 'NORSSI')
-        if self.emg:
-            for comp in self.emg:
-                parts.append(str(comp).ljust(5))
-        print('\r' + ''.join('[{0}]'.format(p) for p in parts), end='')
-        sys.stdout.flush()
+        if self.acceleration:
+
+            #placeholder for values
+            tmp = []
+            print("acceleration: ", self.acceleration[0])
+            print(" ", self.data_locked)
+
+            if (not self.data_locked):
+                if (self.acceleration[0] < 0.85):
+                    print("start recording.........\n")
+                    if self.gyroscope and self.orientation:
+                        for val in self.gyroscope:
+                            tmp.append(val)
+
+                        #calculate orientationeuler
+                        x = self.orientation[0]
+                        y = self.orientation[1]
+                        z = self.orientation[2]
+                        w = self.orientation[3]
+
+                        roll = np.arctan2(2.0 * (w * x + y * z), 1.0 - 2.0 * (x * x + y * y))
+                        pitch = np.arcsin(max(-1.0, min(1.0, 2.0 * (w * y - z * x))))
+                        yaw = np.arctan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
+
+                        tmp.extend([roll,pitch,yaw])
+                        self.data.append(tmp)
+                        print(self.data)
+
+                if self.acceleration[0] > 0.9:
+                    print("rest mode............\n")
+
+                    if (not self.data_locked) and (self.data != []):
+                        print("running scale...............\n")
+                        self.data_locked = True
+                        result = self.scale()
+                        return result
 
     def on_connect(self, myo, timestamp, firmware_version):
         myo.vibrate('short')
@@ -70,8 +133,7 @@ class Listener(libmyo.DeviceListener):
         myo.request_battery_level()
 
     def on_rssi(self, myo, timestamp, rssi):
-        self.rssi = rssi
-        self.output()
+        pass
 
     def on_pose(self, myo, timestamp, pose):
         if pose == libmyo.Pose.double_tap:
@@ -82,29 +144,30 @@ class Listener(libmyo.DeviceListener):
             self.emg_enabled = False
             self.emg = None
         self.pose = pose
-        self.output()
+        self.get_data()
 
     def on_orientation_data(self, myo, timestamp, orientation):
         self.orientation = orientation
-        self.output()
+        self.get_data()
 
     def on_accelerometor_data(self, myo, timestamp, acceleration):
-        pass
+        self.acceleration = acceleration
+        self.get_data()
 
     def on_gyroscope_data(self, myo, timestamp, gyroscope):
         self.gyroscope = gyroscope
-        self.output()
+        self.get_data()
 
     def on_emg_data(self, myo, timestamp, emg):
         pass
 
     def on_unlock(self, myo, timestamp):
         self.locked = False
-        self.output()
+        self.get_data()
 
     def on_lock(self, myo, timestamp):
         self.locked = True
-        self.output()
+        self.get_data()
 
     def on_event(self, kind, event):
         """
