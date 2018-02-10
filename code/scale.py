@@ -29,10 +29,12 @@ def transform(dirpath, thres=0.85):
                 file_gyro = dirpath + "/" + filename 
 
     (start, end) = start_end.find_startend(file_acc, thres)
-    gyro_data = scale(start, end, file_gyro)
-    orien_data = scale(start, end, file_orien)
+    gyro_data = list(scale(start, end, file_gyro))
+    orien_data = list(scale(start, end, file_orien))
 
-    return gyro_data + orien_data
+    gyro_data.extend(orien_data)
+
+    return gyro_data
 
 def scale(start, end, file, bigL=100, smallL=10):
 

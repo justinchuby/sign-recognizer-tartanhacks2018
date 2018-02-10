@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from __future__ import print_function
+from __future__ import division, print_function
 
 import myo as libmyo; libmyo.init("../../sdk/myo.framework")
 import time
@@ -81,29 +81,44 @@ class Listener(libmyo.DeviceListener):
        
         return result 
 
-    def get_gesture(self, vector):
-        # def scale(dict):
-        #     if(feature_max[index] == feature_min[index])
-        #         return;
+    def get_gesture(self, vector, path):
+       
+        def read_range(path):
+            par = []
+            f = open(path, 'r')
+            while 1:
+                s = f.readline()
+                if not s: break
+                tmp = s.split(" ")
+                if len(tmp) == 3:
+                    if tmp[0] != '-1':
+                        par.append([float(tmp[1]), float(tmp[2][:-1])])
+            return par
 
-        #     if(value == feature_min[index])
-        #         value = lower;
-        #     else if(value == feature_max[index])
-        #         value = upper;
-        #     else
-        #         value = lower + (upper-lower) * 
-        #             (value-feature_min[index])/
-        #             (feature_max[index]-feature_min[index]);
+        def scale(vector):
+            par = read_range(path)
+            
+            lower = -1.0
+            upper = 1.0
+            for index in range(len(vector)):
+                val = vector[index]
+                feat_min = par[index][0]
+                feat_max = par[index][1]
+                if (feat_min == feat_max):
+                    return
+                if (val == feat_min):
+                    vector[index] = lower
+                elif(val == feat_max):
+                    vector[index] = upper
+                else:
+                    vector[index] = lower + (upper-lower) * (val-feat_min)/(feat_max-feat_min)
+                    if (vector[index] > 1) : vector[index] = upper
+                    if (vector[index] < -1) : vector[index] = lower
 
-        #     if(value != 0)
-        #     {
-        #         printf("%d:%g ",index, value);
-        #         new_num_nonzeros++;
-        #     }
-
-        svm_dict = {(v+1) : k for v, k in enumerate(vector)}
         #print(svm_dict)
-        (pred_labels, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [svm_dict], svm_load_model("hello.data.model"))
+        vector = list(vector)
+        scale(vector)
+        (pred_labels, (ACC, MSE, SCC), pred_values) = svm_predict([-1], [vector], svm_load_model("hello.data.model"))
         print("pred_labels: ", pred_labels)
         return pred_labels[0]
 
@@ -170,7 +185,7 @@ class Listener(libmyo.DeviceListener):
                             result = self.get_vector()
                             vector = result.flatten()
                             #print("result", vector)
-                            label = self.get_gesture(vector)
+                            label = self.get_gesture(vector, "hello.data.range")
                             return label
 
     def on_connect(self, myo, timestamp, firmware_version):

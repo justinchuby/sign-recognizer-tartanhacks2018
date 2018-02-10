@@ -14,11 +14,15 @@ def gen_feat_str(gestpath, flag):
 		label = "0"
 
 	
+	
 	for samplepath in os.listdir(gestpath):
+
 		if (".DS_Store" not in samplepath):
 			samplepath = gestpath + "/" + samplepath
+			
 			samplevector = gen_samp_feat(samplepath)
 			gestvector.append(samplevector)
+			
 
 	vectorstring = ""
 	vectorlen = len(gestvector[0])
