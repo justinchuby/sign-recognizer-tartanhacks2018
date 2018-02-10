@@ -13,9 +13,12 @@ def gen_feat_str(gestpath, flag):
 	else:
 		label = "0"
 
-	for samplepath in gestpath:
-		samplevector = genvector(samplepath)
-		gestvector.append(samplevector)
+	
+	for samplepath in os.listdir(gestpath):
+		if (".DS_Store" not in samplepath):
+			samplepath = gestpath + "/" + samplepath
+			samplevector = gen_samp_feat(samplepath)
+			gestvector.append(samplevector)
 
 	vectorstring = ""
 	vectorlen = len(gestvector[0])
@@ -27,26 +30,29 @@ def gen_feat_str(gestpath, flag):
 	return vectorstring 
 
 #one vs all file
-def gen_data_file_one(gestname, outputpath):
+def gen_data_file_one(gestname, inputpath):
 	resultstr = ""
-	for gestpath in inputpath:
-		if gestpath == gestname:
-			resultstr += gen_feat_str(gestpath, true)
-		else:
-			resultstr += gen_feat_str(gestpath, false)
-	path = outputpath + "/" + gestname + ".data"
+	for gestpath in os.listdir(inputpath):
+		if not (gestpath.startswith('.')):
+			if gestpath == gestname:
+				gestpath = inputpath + "/" + gestpath
+				resultstr += gen_feat_str(gestpath, True)
+			else:
+				gestpath = inputpath + "/" + gestpath
+				resultstr += gen_feat_str(gestpath, False)
+	path =gestname + ".data"
+	print(path)
 	file = open(path, 'w')
 	file.write(resultstr)
 	file.close()
 
 #all of the one-vs-all files
-def gen_data_file_all(inputpath, outputpath):
-	for gestname in inputpath:
-		gen_data_file_one(gestname, outputpath)
+def gen_data_file_all(inputpath):
+	for gestname in os.listdir(inputpath):
+		gen_data_file_one(gestname, inputpath)
 
 
-
-
+gen_data_file_all("test_data")
 
 
 
