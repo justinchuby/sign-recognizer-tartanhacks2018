@@ -16,13 +16,16 @@ def interpolate(L, length):
 
 # 1acceleration file 2target file 3threshold for deciding start 
 def transform(dirpath, thres=0.85):
-    file_acc = dirpath+"/a.csv"
+
+    for filename in os.listdir(dirpath):
+        if filename.startswith('a'):
+            file_acc = dirpath + "/" + filename
+        if filename.startswith('o'):
+            file_orien = dirpath + "/" + filename
+        if filename.startswith('g'):
+            file_gyro = dirpath + "/" + filename 
+
     (start, end) = start_end.find_startend(file_acc, thres)
-    #print(start, end)
-
-    file_gyro = dirpath+"/g.csv"
-    file_orien = dirpath+"/o.csv"
-
     gyro_data = scale(start, end, file_gyro)
     orien_data = scale(start, end, file_orien)
 

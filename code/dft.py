@@ -5,7 +5,7 @@ import numpy as np
 #dft_frame for array returned by fft
 #time_frame for original array
 
-def transform(time_frame):
+def fft(time_frame):
     dft_frame = np.fft.fft(time_frame)
     return dft_frame
 
