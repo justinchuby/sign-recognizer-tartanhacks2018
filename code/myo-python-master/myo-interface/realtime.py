@@ -24,6 +24,7 @@ import myo as libmyo; libmyo.init("../../sdk/myo.framework")
 import time
 import csv, sys, math, os
 import numpy as np
+from svmutil import *
 
 
 class Listener(libmyo.DeviceListener):
@@ -48,7 +49,7 @@ class Listener(libmyo.DeviceListener):
         self.last_time = 0
 
 
-    def scale(self):
+    def get_vector(self):
 
         def make2dList(rows, cols):
             a=[]
@@ -64,7 +65,7 @@ class Listener(libmyo.DeviceListener):
         #mutex is now locked
         self.data = np.array(self.data) 
         self.data = self.data.transpose()
-        print("transposed data: ", self.data) 
+        #print("transposed data: ", self.data) 
         result0 = make2dList(len(self.data), len(self.data[0]))
 
         for i in range(len(result0)):
@@ -112,7 +113,7 @@ class Listener(libmyo.DeviceListener):
 
                         tmp.extend([roll,pitch,yaw])
                         self.data.append(tmp)
-                        print(self.data)
+                        #print(self.data)
 
                 if self.acceleration[0] > 0.9:
                     print("rest mode............\n")
@@ -120,7 +121,8 @@ class Listener(libmyo.DeviceListener):
                     if (not self.data_locked) and (self.data != []) and (len(self.data) >= 50):
                         print("running scale...............\n")
                         self.data_locked = True
-                        result = self.scale()
+                        result = self.get_vector()
+                        print("result", result)
                         return result
 
     def on_connect(self, myo, timestamp, firmware_version):
