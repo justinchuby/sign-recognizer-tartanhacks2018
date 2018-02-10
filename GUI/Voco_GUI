@@ -25,6 +25,8 @@ class introScreen:
         self.light_coffee = (229,173,103)
         self.CYAN = (54,104,127)
         self.light_cyan = (129,208,255)
+        self.WINE = (127,0,0)
+        self.light_wine = (229,0,0)
 
 
         #program font panel
@@ -66,17 +68,22 @@ class introScreen:
         # self.logo = pygame.image.load("image/logo_v2.png")
         self.new_bg = pygame.image.load("image/new_bg.png")
         self.listenicon = pygame.image.load("image/listenicon.png")
+        self.listenicon_small = pygame.image.load("image/listenicon_small.png")
         self.speakicon = pygame.image.load("image/speakicon.png")
+        self.speakicon_small = pygame.image.load("image/speakicon_small.png")
         self.helpicon = pygame.image.load("image/help.png")
+        self.backicon = pygame.image.load("image/back.png")
         # self.tartanhacksicon = pygame.image.load("image/white-tartanhacks.png")
         # self.vocologo = pygame.image.load("image/VocoLogo.png")
 
 
         # Make all the buttons
         self.listenbutton = pygame.transform.scale(self.listenicon, (180,180))
+        self.listenbutton_small = pygame.transform.scale(self.listenicon_small, (94,94))
         self.speakbutton = pygame.transform.scale(self.speakicon, (157, 157))
+        self.speakbutton_small = pygame.transform.scale(self.speakicon_small, (82, 82))
         self.helpbutton = pygame.transform.scale(self.helpicon, (100, 100))
-
+        self.back_button = pygame.transform.scale(self.backicon,(80,80))
 
     #mouse handler takes care of all the mouse events 
     def mouse_handler(self,event):
@@ -154,7 +161,12 @@ class introScreen:
                     
                     print("This is help Mode")
 
-                if action == "backFromSetting":
+                if action == "backFromListen":
+                    print("This is back")
+                    myWelcomScreen = introScreen()
+                    myWelcomScreen.run()
+
+                if action == "backFromSpeak":
                     print("This is back")
                     myWelcomScreen = introScreen()
                     myWelcomScreen.run()
@@ -201,8 +213,16 @@ class introScreen:
 
 
             self.screen.blit(self.bg, (0,0))
+            
+            self.button("back", 75,588,46,46, self.WINE, self.light_wine, action="backFromListen")
+            self.button("Speak", 73,490,46,46, self.CYAN, self.light_cyan, action="speak")
 
-		
+            listenScreenText = self.largefont.render("Listen Mode",True, self.WHITE)
+            self.screen.blit(listenScreenText, [330,50])
+
+            self.screen.blit(self.back_button, (35, 548))
+            self.screen.blit(self.speakbutton_small, (32, 448))
+            
             pygame.display.update()
 
             self.clock.tick(15)
@@ -217,9 +237,19 @@ class introScreen:
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         quit()
-
-
+            
             self.screen.blit(self.bg, (0,0))
+
+            self.button("back", 75,588,46,46, self.WINE, self.light_wine, action="backFromSpeak")
+            self.screen.blit(self.back_button, (35, 548))
+            
+            self.button("Listen", 75,490,46,46, self.COFFEE, self.light_coffee, action="listen")
+
+            speakScreenText = self.largefont.render("Speech Mode",True, self.WHITE)
+            self.screen.blit(speakScreenText, [330,50])
+
+
+            self.screen.blit(self.listenbutton_small, (28, 442))
 
             pygame.display.update()
 
@@ -238,6 +268,12 @@ class introScreen:
 
 
             self.screen.blit(self.bg, (0,0))
+
+            self.button("back", 75,588,46,46, self.WINE, self.light_wine, action="backFromSpeak")
+            self.screen.blit(self.back_button, (35, 548))
+
+            speakScreenText = self.largefont.render("Instructions",True, self.WHITE)
+            self.screen.blit(speakScreenText, [330,50])
 
             pygame.display.update()
 
