@@ -1,0 +1,18 @@
+docs/_build
+dist/
+
+*.py[cod]
+*.egg-info
+
+# Shared libraries
+*.dll
+*.so
+*.so64
+*.dylib
+*.dylib64
+
+# Executables/Apps (eg. from the Myo SDK)
+*.exe
+*.app
+.project
+.pydevproject
