@@ -3,7 +3,7 @@ numpy==1.14.0
 PyAudio==0.2.11
 six==1.11.0
 SpeechRecognition==3.8.1
-
+pygame
 
 # Extra libs
 # portaudio

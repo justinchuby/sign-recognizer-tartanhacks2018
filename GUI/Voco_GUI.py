@@ -1,6 +1,8 @@
 import sys, pygame
 from pygame.locals import *
 import os, math, random
+import speech_recognition as sr
+
 
 
 class introScreen:
@@ -27,6 +29,11 @@ class introScreen:
         self.light_cyan = (129,208,255)
         self.WINE = (127,0,0)
         self.light_wine = (229,0,0)
+
+        #speech recognition text
+        self.recogText = ""
+        self.isSpeaking = False
+        self.isEndSpeech = False
 
 
         #program font panel
@@ -73,6 +80,8 @@ class introScreen:
         self.speakicon_small = pygame.image.load("image/speakicon_small.png")
         self.helpicon = pygame.image.load("image/help.png")
         self.backicon = pygame.image.load("image/back.png")
+        self.speechicon = pygame.image.load("image/speech.png")
+        self.stopicon = pygame.image.load("image/pause.png")
         # self.tartanhacksicon = pygame.image.load("image/white-tartanhacks.png")
         # self.vocologo = pygame.image.load("image/VocoLogo.png")
 
@@ -84,6 +93,35 @@ class introScreen:
         self.speakbutton_small = pygame.transform.scale(self.speakicon_small, (82, 82))
         self.helpbutton = pygame.transform.scale(self.helpicon, (100, 100))
         self.back_button = pygame.transform.scale(self.backicon,(80,80))
+
+
+    def record_audio(self):
+        
+        # Record Audio
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            if(self.isSpeaking == True):
+                print("Say something!")
+                audio = r.listen(source)
+            else:
+                r.stop()
+
+        # Speech recognition using Google Speech Recognition
+        try:
+            # for testing purposes, we're just using the default API key
+            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # instead of `r.recognize_google(audio)`
+
+            self.recogText = r.recognize_google(audio)
+            print("You said: " + self.recogText)
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+            self.recogText = "Could not understand audio"
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            self.recogText = "Could not request results from Google Speech Recognition service; {0}".format(e)
+
+
 
     #mouse handler takes care of all the mouse events 
     def mouse_handler(self,event):
@@ -170,6 +208,17 @@ class introScreen:
                     print("This is back")
                     myWelcomScreen = introScreen()
                     myWelcomScreen.run()
+
+                if action == "startspeech":
+                    print("Start of Recognition")
+                    self.isSpeaking = True
+                    self.record_audio()
+
+                if action == "stopspeech":
+                    print("End of the Recognition")
+                    self.isSpeaking = False
+                    self.isEndSpeech = True
+
                 
         else:
             # the button returns to the unselected state
@@ -215,10 +264,10 @@ class introScreen:
             self.screen.blit(self.bg, (0,0))
             
             self.button("back", 75,588,46,46, self.WINE, self.light_wine, action="backFromListen")
-            self.button("Speak", 73,490,46,46, self.CYAN, self.light_cyan, action="speak")
+            self.button("Speak", 73,490,46,46, self.CYAN, self.light_cyan, action="speak")      
 
             listenScreenText = self.largefont.render("Listen Mode",True, self.WHITE)
-            self.screen.blit(listenScreenText, [330,50])
+            self.screen.blit(listenScreenText, [300,50])
 
             self.screen.blit(self.back_button, (35, 548))
             self.screen.blit(self.speakbutton_small, (32, 448))
@@ -246,11 +295,31 @@ class introScreen:
             self.button("Listen", 75,490,46,46, self.COFFEE, self.light_coffee, action="listen")
 
             speakScreenText = self.largefont.render("Speech Mode",True, self.WHITE)
-            self.screen.blit(speakScreenText, [330,50])
-
+            self.screen.blit(speakScreenText, [300,50])
+            
+            self.button("Start", 320,590,46,46, self.WINE, self.light_wine, action="startspeech")
+            self.screen.blit(self.speechicon,[297,565])
+            self.button("End", 670,590,46,46, self.CYAN, self.light_cyan, action="endspeech") 
+            self.screen.blit(self.stopicon, [647, 565])
 
             self.screen.blit(self.listenbutton_small, (28, 442))
 
+            if(self.isSpeaking == False):
+                starterText = self.smallfont.render("Please hit Record to start speech recognition. Press stop when finished.", True, self.WHITE)
+                self.screen.blit(starterText,[100,150]) 
+
+            recognizingText = self.smallfont.render("", True, self.WHITE)
+            if(self.isSpeaking == True):
+                recognizingText = self.smallfont.render("Recognizing your speech...", True, self.WHITE)
+                self.screen.blit(recognizingText,[100,200]) 
+
+            recognitionText = self.medfont.render(self.recogText, True, self.WHITE)
+            self.screen.blit(recognitionText,[100,300]) 
+
+            if(self.isEndSpeech == True):
+                endText = self.smallfont.render("Pausing your speech...", True, self.WHITE)
+                self.screen.blit(recognizingText,[100,200]) 
+            
             pygame.display.update()
 
             self.clock.tick(15)
@@ -273,7 +342,7 @@ class introScreen:
             self.screen.blit(self.back_button, (35, 548))
 
             speakScreenText = self.largefont.render("Instructions",True, self.WHITE)
-            self.screen.blit(speakScreenText, [330,50])
+            self.screen.blit(speakScreenText, [300,50])
 
             pygame.display.update()
 
