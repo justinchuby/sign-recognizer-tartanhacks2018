@@ -15,7 +15,7 @@ if not is_win32:
 	svmscale_exe = "/usr/local/bin/svm-scale"
 	svmtrain_exe = "/usr/local/bin/svm-train"
 	svmpredict_exe = "/usr/local/bin/svm-predict"
-	grid_py = "./tools/grid.py"
+	grid_py = "libsvm-3.22/tools/grid.py"
 	gnuplot_exe = "/usr/local/bin/gnuplot"
 else:
         # example for windows

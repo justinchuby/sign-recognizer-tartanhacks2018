@@ -53,7 +53,7 @@ def gen_data_file_all(inputpath):
 			gen_data_file_one(gestname, inputpath)
 
 
-gen_data_file_all("test_data")
+gen_data_file_all(sys.argv[1])
 
 
 
