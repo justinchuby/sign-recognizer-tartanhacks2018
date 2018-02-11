@@ -2,6 +2,7 @@ import sys, pygame
 from pygame.locals import *
 import os, math, random
 import speech_recognition as sr
+from realtime import *
 
 
 
@@ -230,9 +231,12 @@ class introScreen:
                 if action == "startGesture":
                     print("Start of the gesture")
                     # call the gesture recognition function
+                    if(realtime.listener != None):
+                        self.recogText = realtime.listener.finalResult
 
                 if action == "endGesture":
                     print("End of the of gesture")
+                    realtime.stop()
 
 
                 
