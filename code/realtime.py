@@ -20,7 +20,7 @@
 
 from __future__ import print_function
 
-import myo as libmyo; libmyo.init('../../sdk/myo.framework')
+import myo as libmyo; libmyo.init('sdk/myo.framework')
 import time
 import sys
 
